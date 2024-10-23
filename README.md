@@ -151,7 +151,7 @@ sv.plot_image(annotated_image)
 • supervision as sv: Custom module (supervision) for handling annotations and detections.
 • YOLOv10 from ultralytics: A specific object detection model used for this task.
 • base64, numpy: Python libraries for handling base64 encoding/decoding and numerical operations.
-```
+```python
 try:
         app.logger.info("Received POST request")
         data = request.get_json()
