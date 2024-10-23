@@ -1,4 +1,4 @@
-# [YOLOv10: Real-Time End-to-End Object Detection](https://arxiv.org/abs/2405.14458)
+# [YOLOv10:Image Forged Check](https://arxiv.org/abs/2405.14458)
 
 
 Official PyTorch implementation of **YOLOv10**.
@@ -41,7 +41,7 @@ Over the past years, YOLOs have emerged as the predominant paradigm in the field
 - 2024/05/25: Add [colab demo](https://colab.research.google.com/github/roboflow-ai/notebooks/blob/main/notebooks/train-yolov10-object-detection-on-custom-dataset.ipynb#scrollTo=SaKTSzSWnG7s), [HuggingFace Demo](https://huggingface.co/spaces/kadirnar/Yolov10), and [HuggingFace Model Page](https://huggingface.co/kadirnar/Yolov10). Thanks to [SkalskiP](https://github.com/SkalskiP) and [kadirnar](https://github.com/kadirnar)! 
 
 ## Performance
-COCO
+Custom Data set
 
 | Model | Test Size | #Params | FLOPs | AP<sup>val</sup> | Latency |
 |:---------------|:----:|:---:|:--:|:--:|:--:|
@@ -52,26 +52,47 @@ COCO
 | [YOLOv10-L](https://huggingface.co/jameslahm/yolov10l) |   640  |     24.4M   |  120.3G   |     53.2%     | 7.28ms |
 | [YOLOv10-X](https://huggingface.co/jameslahm/yolov10x) |   640  |     29.5M    |   160.4G   |     54.4%     | 10.70ms |
 
-## Installation
-`conda` virtual environment is recommended. 
-```
-conda create -n yolov10 python=3.9
-conda activate yolov10
-pip install -r requirements.txt
-pip install -e .
-```
+## GETTING STARTED - INSTALL
+## -> PREREQUISITES
+clone project    
+    Microsoft VS Code (Optional):
+            • Purpose: VS Code is a popular integrated development environment (IDE) that provides a user-friendly interface for coding and project management.
+            • Usage: While optional, VS Code offers features like syntax highlighting, debugging capabilities, and integration with Git that can enhance development productivity.
+    Python:
+            • Purpose: Python is required as it serves as the programming language for developing and running the YOLOv10 model and associated scripts.
+            • Version Requirement: The specified version requirement is Python 3.0.1 or greater, ensuring compatibility with the required libraries and dependencies for YOLOv10.
+    Dataset:
+            • Purpose: The dataset consists of images used to train the YOLOv10 model.
+            • Importance: The quality and quantity of data directly impact the accuracy and performance of the trained model. More diverse and representative data leads to better 
+               generalization and detection capabilities.
 ## Demo
 ```
-python app.py
-# Please visit http://127.0.0.1:7860
+python main.py
 ```
 
-## Validation
-[`yolov10n`](https://huggingface.co/jameslahm/yolov10n)  [`yolov10s`](https://huggingface.co/jameslahm/yolov10s)  [`yolov10m`](https://huggingface.co/jameslahm/yolov10m)  [`yolov10b`](https://huggingface.co/jameslahm/yolov10b)  [`yolov10l`](https://huggingface.co/jameslahm/yolov10l)  [`yolov10x`](https://huggingface.co/jameslahm/yolov10x)  
-```
-yolo val model=jameslahm/yolov10{n/s/m/b/l/x} data=coco.yaml batch=256
-```
-
+MAKE DATASET WITH ROBOFLOW
+           You can experiment with any custom project on Roboflow Universe, create your own datasets, and even use RF100 datasets sponsored by Intel. Or export dataset file in your desire yolo 
+              version
+ PREPARE YOUR DATASET:
+           Collect a dataset of images containing both fake and real images.Organize these images into a folder structure for easy access.
+ UPLOAD TO ROBOFLOW:
+          Go to the Roboflow website and sign in or create an account.Create a new project in Roboflow and choose the object detection template.Upload your folder containing the images to the 
+           project.
+ CREATE CLASSES:
+          Define two classes: fake and real.Roboflow will prompt you to create these classes during the project setup.
+ ANNOTATE IMAGES:
+          For each image in your dataset, annotate whether the image is fake or real.If an image is fake, highlight and annotate the specific parts of the image that are fake.Use Roboflow’s                     annotation tools to draw bounding boxes around these areas and label them accordingly.
+ EXPORT DATA:
+          Once all images are annotated, go to the export section in Roboflow.Choose the appropriate format for your annotations (e.g., YOLO, COCO).Download the exported dataset, which will                    include the images and their annotations. Or use Roboflow API
+          ```python
+          !pip install -q roboflow 
+          from roboflow import Roboflow 
+          rf = Roboflow(api_key="your-api-key") 
+          project = rf.workspace("vladutc").project("x-ray-baggage") 
+          version = project.version(3) 
+          dataset = version.download("yolov8")
+            ```
+          The exported data includes a data.yaml file, which specifies the license to Roboflow and the folder paths containing the dataset's annotated images. This file is crucial for configuring              the dataset for model training, ensuring all images and their annotations are correctly referenced.
 Or
 ```python
 from ultralytics import YOLOv10
@@ -87,80 +108,90 @@ model.val(data='coco.yaml', batch=256)
 
 ## Training 
 ```
-yolo detect train data=coco.yaml model=yolov10n/s/m/b/l/x.yaml epochs=500 batch=256 imgsz=640 device=0,1,2,3,4,5,6,7
+!yolo task=detect mode=train batch=32 plots=true model='./weights/yolov10n.pt' data='D:\Saqib\IdentifyModifiedImage\Mycode\MLSource\yolov10-main\ImageForensic\data.yaml'
 ```
 
-Or
+After the model training is complete, run the labels_correlogram to verify the results:
 ```python
-from ultralytics import YOLOv10
-
-model = YOLOv10()
-# If you want to finetune the model with pretrained weights, you could load the 
-# pretrained weights like below
-# model = YOLOv10.from_pretrained('jameslahm/yolov10{n/s/m/b/l/x}')
-# or
-# wget https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10{n/s/m/b/l/x}.pt
-# model = YOLOv10('yolov10{n/s/m/b/l/x}.pt')
-
-model.train(data='coco.yaml', epochs=500, batch=256, imgsz=640)
+import cv2
+import supervision as sv
+image = cv2.imread('./runs/detect/train/labels_correlogram.jpg')
+results = model(image)[0]
+sv.plot_image(image)
 ```
 
-## Push to hub to 🤗
+## TESTING SOLUTION
 
-Optionally, you can push your fine-tuned model to the [Hugging Face hub](https://huggingface.co/) as a public or private model:
-
+REQUIRED LIBRUARIES:
+   • cv2: OpenCV library for image processing.
+   • supervision: A library (hypothetical in this context) for managing detections and annotations.
+   • ultralytics: Contains the YOLOv10 model for object detection.
+Loads the YOLOv10 model using the weights obtained from training (best.pt).
+model = YOLOv10('./runs/detect/train/weights/best.pt')
+Reads the image located at the specified path. This is the image on which object detection will be performed.
 ```python
-# let's say you have fine-tuned a model for crop detection
-model.push_to_hub("<your-hf-username-or-organization/yolov10-finetuned-crop-detection")
-
-# you can also pass `private=True` if you don't want everyone to see your model
-model.push_to_hub("<your-hf-username-or-organization/yolov10-finetuned-crop-detection", private=True)
+image = cv2.imread('Image path’)
+scores.results = model(image)[0]
+detections = sv.Detections.from_ultralytics(results)
+print(detections)
+bounding_box_annotator = sv.BoundingBoxAnnotator()
+label_annotator = sv.LabelAnnotator()
+annotated_image=bounding_box_annotator.annotate(scene=image,
+detections=detections)
+annotated_image=label_annotator.annotate(scene=annotated_image,
+detections=detections)
+sv.plot_image(annotated_image)
 ```
 
-## Prediction
-Note that a smaller confidence threshold can be set to detect smaller objects or objects in the distance. Please refer to [here](https://github.com/THU-MIG/yolov10/issues/136) for details.
+## CREATING Flask API
+• Flask: Framework for building web applications in Python.
+• request: Allows handling of incoming HTTP requests.
+• jsonify: Converts Python dictionaries to JSON format for HTTP responses.
+• cv2: OpenCV library for computer vision tasks.
+• supervision as sv: Custom module (supervision) for handling annotations and detections.
+• YOLOv10 from ultralytics: A specific object detection model used for this task.
+• base64, numpy: Python libraries for handling base64 encoding/decoding and numerical operations.
 ```
-yolo predict model=jameslahm/yolov10{n/s/m/b/l/x}
+try:
+        app.logger.info("Received POST request")
+        data = request.get_json()
+        if not data:
+            app.logger.error("Invalid or missing JSON body")
+            return jsonify({"error": "Invalid or missing JSON body"}), 400
+
+        if 'base64String' not in data:
+            app.logger.error("Missing base64String")
+            return jsonify({"error": "Missing base64String"}), 400
+
+        base64_string = data['base64String']
+        app.logger.info(f"Received base64 string of length {len(base64_string)}")
+
+        image_data = base64.b64decode(base64_string)
+        nparr = np.frombuffer(image_data, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        image1 = Image.open(BytesIO(image_data))
+        path = './runs/detect/train5/weights/last.pt'
+        model = YOLOv10(path)
+        results = model(image)[0]
+        detections = sv.Detections.from_ultralytics(results)
+
+        # Annotate the image
+        bounding_box_annotator = sv.BoxAnnotator()
+        label_annotator = sv.LabelAnnotator()
+        annotated_image = bounding_box_annotator.annotate(scene=image, detections=detections)
+        annotated_image = label_annotator.annotate(scene=annotated_image, detections=detections)
+        _, buffer = cv2.imencode('.png', annotated_image)
+        encoded_string = base64.b64encode(buffer).decode('utf-8')
+        # GET_RESULT_STRING(image,model)
+        app.logger.info("Image processed and encoded successfully")
+        return jsonify({"image": encoded_string,"detection_result":detections.data['class_name'].tolist()[1]})
+
+    except Exception as e:
+        app.logger.error(f"Error occurred: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 ```
 
-Or
-```python
-from ultralytics import YOLOv10
 
-model = YOLOv10.from_pretrained('jameslahm/yolov10{n/s/m/b/l/x}')
-# or
-# wget https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10{n/s/m/b/l/x}.pt
-model = YOLOv10('yolov10{n/s/m/b/l/x}.pt')
-
-model.predict()
-```
-
-## Export
-```
-# End-to-End ONNX
-yolo export model=jameslahm/yolov10{n/s/m/b/l/x} format=onnx opset=13 simplify
-# Predict with ONNX
-yolo predict model=yolov10n/s/m/b/l/x.onnx
-
-# End-to-End TensorRT
-yolo export model=jameslahm/yolov10{n/s/m/b/l/x} format=engine half=True simplify opset=13 workspace=16
-# or
-trtexec --onnx=yolov10n/s/m/b/l/x.onnx --saveEngine=yolov10n/s/m/b/l/x.engine --fp16
-# Predict with TensorRT
-yolo predict model=yolov10n/s/m/b/l/x.engine
-```
-
-Or
-```python
-from ultralytics import YOLOv10
-
-model = YOLOv10.from_pretrained('jameslahm/yolov10{n/s/m/b/l/x}')
-# or
-# wget https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10{n/s/m/b/l/x}.pt
-model = YOLOv10('yolov10{n/s/m/b/l/x}.pt')
-
-model.export(...)
-```
 
 ## Acknowledgement
 
