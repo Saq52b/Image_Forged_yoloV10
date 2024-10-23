@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 10
+names: ['Adidas', 'Chevrolet', 'Emirates', 'Etihad Airways', 'Kohler', 'Logo', 'Nike', 'Puma', 'Standard Chartered', 'TeamViewer']
+
+roboflow:
+  workspace: ml-jqubz
+  project: 650-second-mzmvr
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/ml-jqubz/650-second-mzmvr/dataset/1

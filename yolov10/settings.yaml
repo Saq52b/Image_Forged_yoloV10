@@ -1,0 +1,17 @@
+settings_version: 0.0.4
+datasets_dir: D:\Saqib\IdentifyModifiedImage\Mycode\MLSource\yolov10-main\datasets
+weights_dir: weights
+runs_dir: runs
+uuid: a5c8d8beed12d7c96361bcdec949752ef47eb8281c9ce29a34d3187362e9843e
+sync: true
+api_key: ''
+openai_api_key: ''
+clearml: true
+comet: true
+dvc: true
+hub: true
+mlflow: true
+neptune: true
+raytune: true
+tensorboard: true
+wandb: true
